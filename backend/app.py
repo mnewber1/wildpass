@@ -3,6 +3,7 @@ from flask_cors import CORS
 # from scraper import FrontierScraper  # Commented out - using Amadeus API instead
 from amadeus_api import AmadeusFlightSearch
 from trip_planner import find_optimal_trips
+from gowild_blackout import GoWildBlackoutDates
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import json
@@ -67,13 +68,16 @@ def generate_mock_flights(origins, destinations, departure_date, return_date=Non
     # If destinations is ['ANY'], use a few sample destinations
     dest_list = destinations if destinations != ['ANY'] else ['MCO', 'LAS', 'MIA', 'PHX', 'ATL']
 
+    # Check for blackout dates
+    blackout_info = GoWildBlackoutDates.is_flight_affected_by_blackout(departure_date, return_date)
+
     for origin in origins:
         for destination in dest_list[:5]:  # Limit to 5 destinations
             if origin == destination:
                 continue
 
             # Generate 1-2 mock flights per route
-            for i in range(random.randint(1, 2)):
+            for _ in range(random.randint(1, 2)):
                 hour = random.randint(6, 20)
                 minute = random.choice(['00', '15', '30', '45'])
                 departure_time = f"{hour:02d}:{minute} {'AM' if hour < 12 else 'PM'}"
@@ -92,7 +96,9 @@ def generate_mock_flights(origins, destinations, departure_date, return_date=Non
                     'price': round(random.uniform(29, 199), 2),
                     'seatsRemaining': random.randint(1, 15),
                     'airline': 'Frontier Airlines',
-                    'flightNumber': f"F9-{random.randint(1000, 9999)}"
+                    'flightNumber': f"F9-{random.randint(1000, 9999)}",
+                    'gowild_eligible': random.choice([True, True, False]),  # Mostly eligible
+                    'blackout_dates': blackout_info
                 }
                 flights.append(flight)
 
@@ -231,6 +237,9 @@ def search_flights_stream():
                 # For mock data, simulate streaming
                 dest_list = destinations if destinations != ['ANY'] else ['MCO', 'LAS', 'MIA', 'PHX', 'ATL']
 
+                # Check for blackout dates
+                blackout_info = GoWildBlackoutDates.is_flight_affected_by_blackout(departure_date, return_date)
+
                 for origin in origins:
                     for destination in dest_list[:5]:
                         if origin == destination:
@@ -238,7 +247,7 @@ def search_flights_stream():
 
                         # Generate mock flights for this route
                         route_flights = []
-                        for i in range(random.randint(1, 3)):
+                        for _ in range(random.randint(1, 3)):
                             hour = random.randint(6, 20)
                             minute = random.choice(['00', '15', '30', '45'])
                             flight = {
@@ -254,7 +263,9 @@ def search_flights_stream():
                                 'flight_number': f"F9-{random.randint(1000, 9999)}",
                                 'stops': 0,
                                 'aircraft': '320',
-                                'booking_class': 'Economy'
+                                'booking_class': 'Economy',
+                                'gowild_eligible': random.choice([True, True, False]),
+                                'blackout_dates': blackout_info
                             }
                             route_flights.append(flight)
 

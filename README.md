@@ -23,6 +23,11 @@ A full-stack flight search aggregator designed for Frontier Airlines GoWild Pass
 - **GoWild Pricing Display**: Shows "GoWild Pass + taxes" instead of full price for eligible flights
 - **GoWild Filter**: Filter search results to show only GoWild-eligible flights
 - **Visual Indicators**: Green badges and gradient text to highlight GoWild opportunities
+- **Blackout Date Warnings**: Automatic detection and warnings for GoWild blackout periods
+  - Major holidays (Christmas, Thanksgiving, New Year's)
+  - Peak travel seasons (Summer, Spring Break)
+  - Holiday weekends (Memorial Day, Labor Day, etc.)
+  - Clear visual warnings with detailed blackout period information
 
 ### Advanced Filtering & Sorting
 - **Sort Options**:
@@ -125,9 +130,11 @@ wildpass/
 │   ├── app.py                # Flask API server with streaming
 │   ├── amadeus_api.py        # Amadeus API integration
 │   ├── trip_planner.py       # Trip optimization algorithms
+│   ├── gowild_blackout.py    # GoWild blackout dates configuration
 │   ├── scraper.py            # Legacy scraper (deprecated)
 │   ├── requirements.txt      # Python dependencies
-│   └── test_amadeus.py       # API testing
+│   ├── test_amadeus.py       # API testing
+│   └── test_blackout_dates.py # Blackout dates testing
 ├── public/
 │   └── index.html            # HTML template
 ├── src/
@@ -192,6 +199,10 @@ The app automatically detects GoWild-eligible flights using:
 - **Compare Savings**: Regular price shown with strikethrough
 - **Taxes Estimate**: Shows approximate tax/fee range ($5-15)
 - **Seat Availability**: Know how many GoWild seats remain
+- **Blackout Date Awareness**: Automatic warnings for restricted travel periods
+  - Red warning badges on affected flights
+  - Detailed information about which dates are blocked
+  - Helps avoid booking attempts during blackout periods
 
 ## API Endpoints
 

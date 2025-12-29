@@ -4,6 +4,7 @@ Amadeus API Integration for Flight Search
 from amadeus import Client, ResponseError
 from datetime import datetime
 import os
+from gowild_blackout import GoWildBlackoutDates
 
 class AmadeusFlightSearch:
     def __init__(self, api_key=None, api_secret=None):
@@ -97,6 +98,17 @@ class AmadeusFlightSearch:
                 # GoWild uses Economy Basic fare class, typically the lowest price point
                 gowild_eligible = self._is_gowild_eligible(offer)
 
+                # Check for blackout dates
+                departure_date = itineraries[0]['segments'][0]['departure']['at'][:10]
+                return_date = None
+                if is_round_trip:
+                    return_date = itineraries[1]['segments'][0]['departure']['at'][:10]
+
+                blackout_info = GoWildBlackoutDates.is_flight_affected_by_blackout(
+                    departure_date,
+                    return_date
+                )
+
                 # Convert to USD if needed (rough conversion for test API)
                 # In production, you'd want real-time exchange rates
                 if currency == 'EUR':
@@ -120,7 +132,8 @@ class AmadeusFlightSearch:
                         'return_flight': return_flight,
                         'total_price': round(price, 2),  # Total for both directions
                         'seats_remaining': seats_remaining,
-                        'gowild_eligible': gowild_eligible
+                        'gowild_eligible': gowild_eligible,
+                        'blackout_dates': blackout_info
                     }
                 else:
                     # One-way flight
@@ -131,7 +144,8 @@ class AmadeusFlightSearch:
                         'currency': currency,
                         'is_round_trip': False,
                         'seats_remaining': seats_remaining,
-                        'gowild_eligible': gowild_eligible
+                        'gowild_eligible': gowild_eligible,
+                        'blackout_dates': blackout_info
                     }
 
                 flights.append(flight)

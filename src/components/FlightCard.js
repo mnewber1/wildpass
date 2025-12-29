@@ -40,9 +40,14 @@ function FlightCard({ flight }) {
           <span className="airport">{flight.origin}</span>
           <span className="arrow">{flight.is_round_trip ? '⇄' : '→'}</span>
           <span className="airport">{flight.destination}</span>
-          {flight.gowild_eligible && (
+          {flight.gowild_eligible && !flight.blackout_dates?.has_blackout && (
             <span className="gowild-badge" title="Eligible for GoWild Pass redemption">
               🎫 GoWild
+            </span>
+          )}
+          {flight.blackout_dates?.has_blackout && flight.gowild_eligible && (
+            <span className="blackout-badge" title={flight.blackout_dates.message}>
+              ⚠️ Blackout
             </span>
           )}
         </div>
@@ -66,6 +71,17 @@ function FlightCard({ flight }) {
           )}
         </div>
       </div>
+
+      {flight.blackout_dates?.has_blackout && flight.gowild_eligible && (
+        <div className="blackout-warning">
+          <span className="warning-icon">⚠️</span>
+          <div className="warning-content">
+            <strong>GoWild Pass Blackout Period</strong>
+            <p>{flight.blackout_dates.message}</p>
+            <small>This flight cannot be booked with a GoWild pass during this period.</small>
+          </div>
+        </div>
+      )}
 
       {flight.is_round_trip ? (
         <div className="round-trip-container">
