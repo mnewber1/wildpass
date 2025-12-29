@@ -1,6 +1,6 @@
 # Quick Setup Guide
 
-Follow these steps to get WildPass running on your local machine.
+Get WildPass running on your local machine in minutes with our automated setup script!
 
 ## Prerequisites
 
@@ -9,17 +9,46 @@ Follow these steps to get WildPass running on your local machine.
 - npm or yarn
 - pip
 
-## Step 1: Get Amadeus API Credentials
+## Automated Setup (Recommended)
+
+We've created an automated setup script that handles everything for you:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+The script will:
+- ✅ Check for required dependencies (Node.js, Python, pip)
+- ✅ Create environment files from templates
+- ✅ Optionally configure your Amadeus API credentials
+- ✅ Set up Python virtual environment
+- ✅ Install all backend dependencies
+- ✅ Install all frontend dependencies
+- ✅ Optionally start both servers automatically
+
+Just follow the interactive prompts!
+
+### Get Amadeus API Credentials (Optional)
+
+If you want to use real flight data instead of mock data:
 
 1. Go to [https://developers.amadeus.com](https://developers.amadeus.com)
 2. Click "Register" to create a free account
 3. After logging in, click "Create New App"
 4. Give your app a name (e.g., "WildPass Flight Search")
-5. Copy your **API Key** and **API Secret** - you'll need these in the next step
+5. Copy your **API Key** and **API Secret**
+6. Enter them when the setup script prompts you
 
-> **Note**: The free test API has limited flight data but is perfect for development. You can upgrade to production API later for comprehensive results.
+> **Note**: The free test API has limited flight data but is perfect for development. You can also skip this step and use `DEV_MODE=true` for testing with mock data.
 
-## Step 2: Frontend Setup
+---
+
+## Manual Setup (Alternative)
+
+If you prefer to set up manually or the automated script doesn't work for your system:
+
+### Step 1: Frontend Setup
 
 1. Install dependencies:
 ```bash
@@ -36,58 +65,65 @@ cp .env.example .env
 REACT_APP_API_URL=http://localhost:5001/api
 ```
 
-## Step 3: Backend Setup
+### Step 2: Backend Setup
 
 1. Navigate to backend directory:
 ```bash
 cd backend
 ```
 
-2. Install Python dependencies:
+2. Create and activate virtual environment (recommended):
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On macOS/Linux
+# or
+venv\Scripts\activate  # On Windows
+```
+
+3. Install Python dependencies:
 ```bash
 pip install -r requirements.txt
-# or
-pip3 install -r requirements.txt
 ```
 
 > **Note**: This installs Flask, CORS support, Amadeus SDK, python-dotenv, and other required packages.
 
-3. Create backend environment file:
+4. Create backend environment file:
 ```bash
 cp .env.example .env
 ```
 
-4. Open `backend/.env` and add your Amadeus credentials:
+5. Open `backend/.env` and add your Amadeus credentials (or set `DEV_MODE=true`):
 ```env
 AMADEUS_API_KEY=your_api_key_here
 AMADEUS_API_SECRET=your_api_secret_here
 DEV_MODE=false
 ```
 
-Replace `your_api_key_here` and `your_api_secret_here` with the credentials from Step 1.
+Replace `your_api_key_here` and `your_api_secret_here` with your credentials.
 
-## Step 4: Run the Application
+### Step 3: Run the Application
 
 You'll need **two terminal windows** open:
 
-### Terminal 1 - Frontend (from project root):
+#### Terminal 1 - Backend (from project root):
+```bash
+cd backend
+source venv/bin/activate  # If using virtual environment
+python app.py
+```
+This will start the Flask API on [http://localhost:5001](http://localhost:5001)
+
+#### Terminal 2 - Frontend (from project root):
 ```bash
 npm start
 ```
 This will start the React app on [http://localhost:3000](http://localhost:3000)
 
-### Terminal 2 - Backend (from project root):
-```bash
-cd backend
-python app.py
-# or
-python3 app.py
-```
-This will start the Flask API on [http://localhost:5001](http://localhost:5001)
-
 > **Important**: The backend automatically loads your `.env` file, so your Amadeus API credentials will be available without any additional setup.
 
-## Step 5: Test the Application
+---
+
+## Test the Application
 
 1. Open your browser to [http://localhost:3000](http://localhost:3000)
 2. Try a test search:

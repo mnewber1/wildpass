@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './SearchForm.css';
 
 function SearchForm({ onSearch, loading }) {
+  const [searchMode, setSearchMode] = useState('package'); // 'package' or 'build-your-own'
   const [origins, setOrigins] = useState('');
   const [destinations, setDestinations] = useState('');
   const [anyDestination, setAnyDestination] = useState(false);
@@ -23,12 +24,18 @@ function SearchForm({ onSearch, loading }) {
       : destinations.split(',').map(s => s.trim()).filter(s => s);
 
     const searchParams = {
+      searchMode,
       origins: originAirports,
       destinations: destinationAirports,
-      tripType,
+      tripType: searchMode === 'build-your-own' ? 'one-way' : tripType, // Always one-way for build-your-own
       departureDate,
-      returnDate: tripType === 'one-way' ? null : returnDate,
+      returnDate: tripType === 'one-way' || searchMode === 'build-your-own' ? null : returnDate,
     };
+
+    // Add build-your-own specific parameters
+    if (searchMode === 'build-your-own' && returnDate) {
+      searchParams.desiredReturnDate = returnDate;
+    }
 
     // Add trip planner specific parameters
     if (tripType === 'trip-planner') {
@@ -49,50 +56,83 @@ function SearchForm({ onSearch, loading }) {
       <h2>Search Flights</h2>
       <form onSubmit={handleSubmit} className="search-form">
         <div className="form-group">
-          <label htmlFor="tripType">Trip Type</label>
+          <label htmlFor="searchMode">Search Mode</label>
           <div className="trip-type-selector">
-            <label className={`trip-type-option ${tripType === 'one-way' ? 'active' : ''}`}>
+            <label className={`trip-type-option ${searchMode === 'package' ? 'active' : ''}`}>
               <input
                 type="radio"
-                name="tripType"
-                value="one-way"
-                checked={tripType === 'one-way'}
-                onChange={(e) => setTripType(e.target.value)}
+                name="searchMode"
+                value="package"
+                checked={searchMode === 'package'}
+                onChange={(e) => setSearchMode(e.target.value)}
               />
-              <span>One Way</span>
+              <span>Package Trip</span>
             </label>
-            <label className={`trip-type-option ${tripType === 'round-trip' ? 'active' : ''}`}>
+            <label className={`trip-type-option ${searchMode === 'build-your-own' ? 'active' : ''}`}>
               <input
                 type="radio"
-                name="tripType"
-                value="round-trip"
-                checked={tripType === 'round-trip'}
-                onChange={(e) => setTripType(e.target.value)}
+                name="searchMode"
+                value="build-your-own"
+                checked={searchMode === 'build-your-own'}
+                onChange={(e) => setSearchMode(e.target.value)}
               />
-              <span>Round Trip</span>
-            </label>
-            <label className={`trip-type-option ${tripType === 'day-trip' ? 'active' : ''}`}>
-              <input
-                type="radio"
-                name="tripType"
-                value="day-trip"
-                checked={tripType === 'day-trip'}
-                onChange={(e) => setTripType(e.target.value)}
-              />
-              <span>Day Trip</span>
-            </label>
-            <label className={`trip-type-option ${tripType === 'trip-planner' ? 'active' : ''}`}>
-              <input
-                type="radio"
-                name="tripType"
-                value="trip-planner"
-                checked={tripType === 'trip-planner'}
-                onChange={(e) => setTripType(e.target.value)}
-              />
-              <span>Trip Planner</span>
+              <span>Build Your Own</span>
             </label>
           </div>
+          <small>
+            {searchMode === 'package'
+              ? 'Search for complete round-trip packages'
+              : 'Select outbound flight first, then choose your return flight'}
+          </small>
         </div>
+
+        {searchMode === 'package' && (
+          <div className="form-group">
+            <label htmlFor="tripType">Trip Type</label>
+            <div className="trip-type-selector">
+              <label className={`trip-type-option ${tripType === 'one-way' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="tripType"
+                  value="one-way"
+                  checked={tripType === 'one-way'}
+                  onChange={(e) => setTripType(e.target.value)}
+                />
+                <span>One Way</span>
+              </label>
+              <label className={`trip-type-option ${tripType === 'round-trip' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="tripType"
+                  value="round-trip"
+                  checked={tripType === 'round-trip'}
+                  onChange={(e) => setTripType(e.target.value)}
+                />
+                <span>Round Trip</span>
+              </label>
+              <label className={`trip-type-option ${tripType === 'day-trip' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="tripType"
+                  value="day-trip"
+                  checked={tripType === 'day-trip'}
+                  onChange={(e) => setTripType(e.target.value)}
+                />
+                <span>Day Trip</span>
+              </label>
+              <label className={`trip-type-option ${tripType === 'trip-planner' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="tripType"
+                  value="trip-planner"
+                  checked={tripType === 'trip-planner'}
+                  onChange={(e) => setTripType(e.target.value)}
+                />
+                <span>Trip Planner</span>
+              </label>
+            </div>
+          </div>
+        )}
 
         <div className="form-group">
           <label htmlFor="origins">Origin Airports (comma-separated)</label>
@@ -142,7 +182,36 @@ function SearchForm({ onSearch, loading }) {
           )}
         </div>
 
-        {tripType !== 'trip-planner' && (
+        {searchMode === 'build-your-own' && (
+          <>
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="departureDate">Outbound Departure Date</label>
+                <input
+                  type="date"
+                  id="departureDate"
+                  value={departureDate}
+                  onChange={(e) => setDepartureDate(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="returnDate">Desired Return Date</label>
+                <input
+                  type="date"
+                  id="returnDate"
+                  value={returnDate}
+                  onChange={(e) => setReturnDate(e.target.value)}
+                  required
+                />
+                <small>We'll show return flights on or near this date</small>
+              </div>
+            </div>
+          </>
+        )}
+
+        {searchMode === 'package' && tripType !== 'trip-planner' && (
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="departureDate">

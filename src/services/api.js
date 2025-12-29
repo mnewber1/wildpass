@@ -9,7 +9,9 @@ const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
 class CacheManager {
   static getCacheKey(origins, destinations, tripType, departureDate, returnDate) {
-    return `${CACHE_PREFIX}${origins.sort().join(',')}_${destinations.sort().join(',')}_${tripType}_${departureDate}_${returnDate || 'null'}`;
+    // Don't sort arrays - maintain origin->destination order for cache key
+    // This ensures that ORD->CUN and CUN->ORD are treated as different searches
+    return `${CACHE_PREFIX}${origins.join(',')}_${destinations.join(',')}_${tripType}_${departureDate}_${returnDate || 'null'}`;
   }
 
   static setCache(key, data) {
@@ -99,10 +101,13 @@ export const searchFlightsStreaming = (searchParams, onFlights, onComplete, onEr
 
   // Check cache first
   const cacheKey = CacheManager.getCacheKey(origins, destinations, tripType, departureDate, returnDate);
+  console.log('🔑 Cache key:', cacheKey);
+  console.log('📋 Search params:', { origins, destinations, tripType, departureDate, returnDate });
+
   const cachedData = CacheManager.getCache(cacheKey);
 
   if (cachedData) {
-    console.log('Returning cached flight data');
+    console.log('✅ Returning cached flight data');
     // Return cached data immediately
     if (cachedData.flights) {
       onFlights(cachedData.flights);
@@ -112,6 +117,8 @@ export const searchFlightsStreaming = (searchParams, onFlights, onComplete, onEr
     }
     return;
   }
+
+  console.log('🌐 Fetching fresh data from API');
 
   // Use fetch with stream for SSE
   fetch(`${API_BASE_URL}/search/stream`, {

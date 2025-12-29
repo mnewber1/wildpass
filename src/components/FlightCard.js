@@ -1,7 +1,38 @@
 import React from 'react';
 import './FlightCard.css';
 
-function FlightCard({ flight }) {
+function FlightCard({ flight, buildYourOwnMode = false, buildYourOwnStep = 'outbound', onSelectFlight }) {
+  // Calculate trip statistics for completed build-your-own trips
+  const calculateTripStats = () => {
+    if (!flight.is_round_trip || !flight.return_flight) return null;
+
+    const outboundDepart = new Date(`${flight.departure_date} ${flight.departure_time}`);
+    const outboundArrive = new Date(`${flight.arrival_date || flight.arrivalDate} ${flight.arrival_time || flight.arrivalTime}`);
+    const returnDepart = new Date(`${flight.return_flight.departure_date} ${flight.return_flight.departure_time}`);
+    const returnArrive = new Date(`${flight.return_flight.arrival_date || flight.return_flight.arrivalDate} ${flight.return_flight.arrival_time || flight.return_flight.arrivalTime}`);
+
+    // Total trip duration (from initial departure to final arrival)
+    const totalTripMs = returnArrive - outboundDepart;
+    const totalTripDays = Math.floor(totalTripMs / (1000 * 60 * 60 * 24));
+    const totalTripHours = Math.floor((totalTripMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+    // Time at destination (from outbound arrival to return departure)
+    const destinationMs = returnDepart - outboundArrive;
+    const destinationDays = Math.floor(destinationMs / (1000 * 60 * 60 * 24));
+    const destinationHours = Math.floor((destinationMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+    return {
+      totalTripDays,
+      totalTripHours,
+      destinationDays,
+      destinationHours,
+      outboundDepart,
+      returnArrive
+    };
+  };
+
+  const tripStats = calculateTripStats();
+
   // Helper to render a single flight segment
   const renderFlightSegment = (flightData, label) => (
     <div className="flight-segment">
@@ -34,7 +65,44 @@ function FlightCard({ flight }) {
   );
 
   return (
-    <div className={`flight-card ${flight.is_round_trip ? 'round-trip' : 'one-way'}`}>
+    <div className={`flight-card ${flight.is_round_trip ? 'round-trip' : 'one-way'} ${buildYourOwnMode && buildYourOwnStep === 'complete' ? 'completed-trip' : ''}`}>
+      {/* Trip Summary Header for completed build-your-own trips */}
+      {buildYourOwnMode && buildYourOwnStep === 'complete' && tripStats && (
+        <div className="trip-summary-header">
+          <div className="trip-summary-title">
+            <span className="success-icon">✓</span>
+            <h3>Your Custom Trip to {flight.destination}</h3>
+          </div>
+          <div className="trip-stats-grid">
+            <div className="trip-stat">
+              <div className="stat-icon">📅</div>
+              <div className="stat-content">
+                <div className="stat-value">
+                  {tripStats.totalTripDays > 0 ? `${tripStats.totalTripDays}d ${tripStats.totalTripHours}h` : `${tripStats.totalTripHours}h`}
+                </div>
+                <div className="stat-label">Total Trip Time</div>
+              </div>
+            </div>
+            <div className="trip-stat">
+              <div className="stat-icon">🏖️</div>
+              <div className="stat-content">
+                <div className="stat-value">
+                  {tripStats.destinationDays > 0 ? `${tripStats.destinationDays}d ${tripStats.destinationHours}h` : `${tripStats.destinationHours}h`}
+                </div>
+                <div className="stat-label">Time at Destination</div>
+              </div>
+            </div>
+            <div className="trip-stat">
+              <div className="stat-icon">💰</div>
+              <div className="stat-content">
+                <div className="stat-value">${flight.total_price?.toFixed(2) || (flight.price + (flight.return_flight?.price || 0)).toFixed(2)}</div>
+                <div className="stat-label">Total Price</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flight-header">
         <div className="route">
           <span className="airport">{flight.origin}</span>
@@ -52,7 +120,12 @@ function FlightCard({ flight }) {
           )}
         </div>
         <div className="price-section">
-          {flight.gowild_eligible ? (
+          {buildYourOwnMode && buildYourOwnStep === 'complete' ? (
+            <>
+              <div className="price">${flight.total_price?.toFixed(2) || (flight.price + (flight.return_flight?.price || 0)).toFixed(2)}</div>
+              <div className="price-label">Total for Both Flights</div>
+            </>
+          ) : flight.gowild_eligible ? (
             <>
               <div className="price gowild-price">GoWild Pass</div>
               <div className="price-label gowild-label">+ taxes/fees (~$5-15)</div>
@@ -95,7 +168,22 @@ function FlightCard({ flight }) {
 
       <div className="flight-footer">
         <span className="airline">{flight.airline}</span>
-        <button className="book-button">View Details</button>
+        {buildYourOwnMode ? (
+          buildYourOwnStep === 'complete' ? (
+            <button className="book-button book-trip-button">
+              Book This Trip →
+            </button>
+          ) : (
+            <button
+              className="select-flight-button"
+              onClick={() => onSelectFlight && onSelectFlight(flight)}
+            >
+              {buildYourOwnStep === 'outbound' ? 'Select Outbound →' : '← Select Return'}
+            </button>
+          )
+        ) : (
+          <button className="book-button">View Details</button>
+        )}
       </div>
     </div>
   );

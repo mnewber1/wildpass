@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './DestinationCard.css';
 import FlightCard from './FlightCard';
 
-function DestinationCard({ destination, flights, origin }) {
+function DestinationCard({ destination, flights, origin, buildYourOwnMode = false, buildYourOwnStep = 'outbound', onSelectFlight }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Find the cheapest flight for the summary
@@ -81,7 +81,13 @@ function DestinationCard({ destination, flights, origin }) {
         <div className="destination-flights">
           <div className="flights-list">
             {flights.map((flight, index) => (
-              <FlightCard key={index} flight={flight} />
+              <FlightCard
+                key={index}
+                flight={flight}
+                buildYourOwnMode={buildYourOwnMode}
+                buildYourOwnStep={buildYourOwnStep}
+                onSelectFlight={onSelectFlight}
+              />
             ))}
           </div>
         </div>

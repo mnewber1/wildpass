@@ -4,7 +4,16 @@ A full-stack flight search aggregator designed for Frontier Airlines GoWild Pass
 
 ## 🚀 Quick Start
 
-**New to WildPass?** See [SETUP.md](SETUP.md) for step-by-step installation instructions including how to get your free Amadeus API credentials.
+**New to WildPass?** Run our automated setup script:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+The script will guide you through the entire setup process, including optional Amadeus API configuration.
+
+For detailed instructions or manual setup, see [SETUP.md](SETUP.md).
 
 ## Features
 
@@ -86,14 +95,30 @@ A full-stack flight search aggregator designed for Frontier Airlines GoWild Pass
 
 > **👉 For detailed setup instructions, see [SETUP.md](SETUP.md)**
 
-#### Quick Install
+#### Automated Setup (Recommended)
 
-1. **Get Amadeus API credentials** (free at [developers.amadeus.com](https://developers.amadeus.com))
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+The setup script will:
+- ✅ Verify prerequisites (Node.js, Python, pip)
+- ✅ Create environment files
+- ✅ Set up Python virtual environment
+- ✅ Install all dependencies
+- ✅ Configure Amadeus API credentials (optional)
+- ✅ Start both servers (optional)
+
+#### Manual Setup
+
+1. **Get Amadeus API credentials** (optional - free at [developers.amadeus.com](https://developers.amadeus.com))
 
 2. **Install dependencies:**
    ```bash
    npm install
-   cd backend && pip install -r requirements.txt
+   cd backend && python3 -m venv venv && source venv/bin/activate
+   pip install -r requirements.txt
    ```
 
 3. **Configure environment:**
@@ -105,19 +130,21 @@ A full-stack flight search aggregator designed for Frontier Airlines GoWild Pass
    cd backend
    cp .env.example .env
    # Edit backend/.env and add your Amadeus API credentials
+   # Or set DEV_MODE=true for mock data
    ```
 
 4. **Run the application** (requires 2 terminals):
 
-   **Terminal 1 - Frontend:**
-   ```bash
-   npm start
-   ```
-
-   **Terminal 2 - Backend:**
+   **Terminal 1 - Backend:**
    ```bash
    cd backend
+   source venv/bin/activate
    python app.py
+   ```
+
+   **Terminal 2 - Frontend:**
+   ```bash
+   npm start
    ```
 
 5. **Open [http://localhost:3000](http://localhost:3000)** in your browser

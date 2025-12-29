@@ -273,3 +273,133 @@
   font-size: 0.75rem;
   font-style: italic;
 }
+
+/* Build your own mode styles */
+.select-flight-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}
+
+.select-flight-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Completed Trip Styles */
+.flight-card.completed-trip {
+  border: 3px solid #48bb78;
+  box-shadow: 0 8px 24px rgba(72, 187, 120, 0.2);
+}
+
+.trip-summary-header {
+  background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+  padding: 1.5rem;
+  border-bottom: 2px solid #48bb78;
+  border-radius: 12px 12px 0 0;
+  margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+}
+
+.trip-summary-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.trip-summary-title h3 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.trip-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.trip-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 2px solid #c6f6d5;
+  transition: all 0.2s;
+}
+
+.trip-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.15);
+}
+
+.stat-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.book-trip-button {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  font-size: 1.1rem;
+  padding: 0.75rem 2rem;
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.book-trip-button:hover {
+  background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
+}
+
+@media (max-width: 768px) {
+  .trip-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .trip-summary-title h3 {
+    font-size: 1.25rem;
+  }
+}

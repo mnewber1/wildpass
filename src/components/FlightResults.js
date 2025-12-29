@@ -2,7 +2,18 @@ import React, { useState, useMemo } from 'react';
 import './FlightResults.css';
 import DestinationCard from './DestinationCard';
 
-function FlightResults({ flights, searchParams, fromCache, tripPlannerInfo }) {
+function FlightResults({
+  flights,
+  searchParams,
+  fromCache,
+  tripPlannerInfo,
+  buildYourOwnMode = false,
+  buildYourOwnStep = 'outbound',
+  selectedOutboundFlight = null,
+  onSelectOutbound,
+  onSelectReturn,
+  onResetBuildYourOwn
+}) {
   const [sortBy, setSortBy] = useState('price'); // 'price', 'nonstop', 'earliest'
   const [nonstopOnly, setNonstopOnly] = useState(false);
   const [gowildOnly, setGowildOnly] = useState(false);
@@ -124,6 +135,40 @@ function FlightResults({ flights, searchParams, fromCache, tripPlannerInfo }) {
         </div>
       </div>
 
+      {buildYourOwnMode && (
+        <div className="build-your-own-status">
+          {buildYourOwnStep === 'outbound' && (
+            <div className="step-indicator">
+              <span className="step-number active">1</span>
+              <span className="step-label">Select Outbound Flight</span>
+              <span className="step-number">2</span>
+              <span className="step-label">Select Return Flight</span>
+            </div>
+          )}
+          {buildYourOwnStep === 'return' && selectedOutboundFlight && (
+            <div className="step-indicator">
+              <span className="step-number completed">✓</span>
+              <span className="step-label">Outbound Selected</span>
+              <span className="step-number active">2</span>
+              <span className="step-label">Select Return Flight</span>
+              <button className="change-outbound-btn" onClick={onResetBuildYourOwn}>
+                Change Outbound
+              </button>
+            </div>
+          )}
+          {selectedOutboundFlight && buildYourOwnStep === 'return' && (
+            <div className="selected-outbound-summary">
+              <h3>Selected Outbound Flight</h3>
+              <div className="flight-summary-compact">
+                <span>{selectedOutboundFlight.origin} → {selectedOutboundFlight.destination}</span>
+                <span>{selectedOutboundFlight.departure_date} at {selectedOutboundFlight.departure_time}</span>
+                <span className="price">${selectedOutboundFlight.price}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {flights.length === 0 ? (
         <div className="no-results">
           <div className="no-results-icon">✈️</div>
@@ -196,6 +241,9 @@ function FlightResults({ flights, searchParams, fromCache, tripPlannerInfo }) {
                 destination={group.destination}
                 flights={group.flights}
                 origin={group.origin}
+                buildYourOwnMode={buildYourOwnMode}
+                buildYourOwnStep={buildYourOwnStep}
+                onSelectFlight={buildYourOwnStep === 'outbound' ? onSelectOutbound : onSelectReturn}
               />
             ))}
           </div>
