@@ -94,6 +94,10 @@ class AmadeusFlightSearch:
                 # Get seats remaining (if available)
                 seats_remaining = offer.get('numberOfBookableSeats')
 
+                # Check if this is a round-trip (multiple itineraries)
+                itineraries = offer['itineraries']
+                is_round_trip = len(itineraries) > 1
+
                 # Determine if this is GoWild eligible
                 # GoWild uses Economy Basic fare class, typically the lowest price point
                 gowild_eligible = self._is_gowild_eligible(offer)
@@ -114,10 +118,6 @@ class AmadeusFlightSearch:
                 if currency == 'EUR':
                     price = price * 1.1  # Approximate EUR to USD conversion
                     currency = 'USD'
-
-                # Check if this is a round-trip (multiple itineraries)
-                itineraries = offer['itineraries']
-                is_round_trip = len(itineraries) > 1
 
                 if is_round_trip:
                     # Process as round-trip with outbound and return flights
