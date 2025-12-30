@@ -7,9 +7,9 @@ node_modules/
 !.env.example
 
 # Python
-__pycache__/
 *.py[cod]
 *$py.class
+__pycache__/
 .Python
 *.so
 
@@ -26,3 +26,5 @@ Thumbs.db
 # Build outputs
 build/
 dist/
+venv/
+backend.log

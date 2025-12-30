@@ -15,7 +15,10 @@ import time
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for React frontend
+
+# Configure CORS - allow specific origins in production
+allowed_origins = os.environ.get('CORS_ORIGINS', '*').split(',')
+CORS(app, origins=allowed_origins)
 
 # Initialize scraper (commented out - using Amadeus API)
 # scraper = FrontierScraper()
@@ -452,4 +455,7 @@ def cache_stats():
 
 if __name__ == '__main__':
     # Run on port 5001 (5000 is often used by macOS AirPlay)
-    app.run(debug=True, port=5001, host='127.0.0.1')
+    # For local development only - use gunicorn in production
+    port = int(os.environ.get('PORT', 5001))
+    debug = os.environ.get('FLASK_ENV') == 'development'
+    app.run(debug=debug, port=port, host='0.0.0.0')

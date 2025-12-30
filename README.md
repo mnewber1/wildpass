@@ -358,6 +358,98 @@ This generates mock flight data instead of calling Amadeus.
 - **Data Accuracy**: Real-time data from official sources
 - **Educational Purpose**: Tool designed for personal use and learning
 
+## Deployment
+
+WildPass is production-ready and can be deployed to various hosting platforms. Below are instructions for Render.com (recommended for beginners).
+
+### Deploying to Render
+
+#### Prerequisites
+- GitHub account with your code pushed to a repository
+- Render account (free at [render.com](https://render.com))
+- **New Amadeus API credentials** (don't reuse development keys)
+
+#### Backend Deployment (Web Service)
+
+1. **Create a new Web Service** on Render
+2. **Connect your GitHub repository**
+3. **Configure the service:**
+   - **Name**: `wildpass-backend` (or your choice)
+   - **Root Directory**: `backend`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn app:app`
+   - **Instance Type**: Free tier works fine
+
+4. **Set Environment Variables:**
+   - `AMADEUS_API_KEY`: Your production Amadeus API key
+   - `AMADEUS_API_SECRET`: Your production Amadeus API secret
+   - `FLASK_ENV`: `production`
+   - `CORS_ORIGINS`: Your frontend URL (update after deploying frontend)
+
+5. **Deploy** - Render will build and start your backend
+6. **Note your backend URL** (e.g., `https://wildpass-backend.onrender.com`)
+
+#### Frontend Deployment (Static Site)
+
+1. **Create a new Static Site** on Render
+2. **Connect your GitHub repository**
+3. **Configure the service:**
+   - **Name**: `wildpass` (or your choice)
+   - **Root Directory**: `.` (leave blank or use root)
+   - **Build Command**: `npm install && REACT_APP_API_URL=$REACT_APP_API_URL npm run build`
+   - **Publish Directory**: `build`
+
+4. **Set Environment Variable:**
+   - `REACT_APP_API_URL`: `https://your-backend-url.onrender.com/api`
+   - Replace with your actual backend URL from step 6 above
+
+5. **Deploy** - Render will build and deploy your frontend
+
+#### Post-Deployment Configuration
+
+After both services are deployed:
+
+1. **Update backend CORS:**
+   - Go to your backend service on Render
+   - Update `CORS_ORIGINS` environment variable to your frontend URL
+   - Example: `https://wildpass.onrender.com`
+   - **Restart the backend service**
+
+2. **Test your application:**
+   - Visit your frontend URL
+   - Try searching for flights
+   - Check browser console for any errors
+
+#### Important Notes
+
+- **Free Tier Limitations**: Render's free tier spins down after 15 minutes of inactivity
+  - First request after inactivity may take 30-60 seconds to "wake up"
+  - Consider upgrading to paid tier ($7/month) for instant responses
+
+- **Security**:
+  - Never commit `.env` files to Git
+  - Use production API credentials (not development/test keys)
+  - CORS is restricted to your frontend domain only
+
+- **Monitoring**:
+  - Check Render logs if issues occur
+  - Backend logs show API errors and request details
+  - Frontend build logs show any build-time errors
+
+### Alternative Hosting Options
+
+- **Vercel** (Frontend): Free, excellent for React apps
+  - Set `REACT_APP_API_URL` in environment variables
+  - Automatic deployments on git push
+
+- **Railway** (Full Stack): ~$5/month
+  - Supports both frontend and backend
+  - Easy monorepo setup
+
+- **Fly.io** (Backend): Free tier available
+  - Docker-based deployment
+  - Global edge network
+
 ## Contributing
 
 Contributions welcome! Please:

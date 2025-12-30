@@ -29,14 +29,15 @@ function FlightResults({
       filteredFlights = filteredFlights.filter(flight => flight.gowild_eligible);
     }
 
-    // Group by destination
+    // Group by destination for outbound, or by origin for return flights
+    const groupByField = buildYourOwnStep === 'return' ? 'origin' : 'destination';
     const groups = {};
     filteredFlights.forEach(flight => {
-      const dest = flight.destination;
-      if (!groups[dest]) {
-        groups[dest] = [];
+      const groupKey = flight[groupByField];
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
       }
-      groups[dest].push(flight);
+      groups[groupKey].push(flight);
     });
 
     // Sort flights within each destination group
@@ -78,19 +79,20 @@ function FlightResults({
       });
     });
 
-    // Sort destinations by cheapest flight price
-    const sortedDestinations = Object.keys(groups).sort((destA, destB) => {
-      const minPriceA = Math.min(...groups[destA].map(f => f.price));
-      const minPriceB = Math.min(...groups[destB].map(f => f.price));
+    // Sort groups by cheapest flight price
+    const sortedGroups = Object.keys(groups).sort((groupA, groupB) => {
+      const minPriceA = Math.min(...groups[groupA].map(f => f.price));
+      const minPriceB = Math.min(...groups[groupB].map(f => f.price));
       return minPriceA - minPriceB;
     });
 
-    return sortedDestinations.map(dest => ({
-      destination: dest,
-      flights: groups[dest],
-      origin: groups[dest][0].origin
+    // For return flights, the groupKey is the origin, so swap destination/origin in the result
+    return sortedGroups.map(groupKey => ({
+      destination: buildYourOwnStep === 'return' ? groups[groupKey][0].destination : groupKey,
+      flights: groups[groupKey],
+      origin: buildYourOwnStep === 'return' ? groupKey : groups[groupKey][0].origin
     }));
-  }, [flights, sortBy, nonstopOnly, gowildOnly]);
+  }, [flights, sortBy, nonstopOnly, gowildOnly, buildYourOwnStep]);
 
   if (!searchParams) {
     return null;

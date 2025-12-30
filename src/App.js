@@ -16,30 +16,32 @@ function App() {
 
   // Build-your-own mode state
   const [selectedOutboundFlight, setSelectedOutboundFlight] = useState(null);
-  const [returnFlights, setReturnFlights] = useState([]);
   const [buildYourOwnStep, setBuildYourOwnStep] = useState('outbound'); // 'outbound' or 'return'
+  const [originalSearchParams, setOriginalSearchParams] = useState(null); // Store original search params
 
   const handleSelectOutboundFlight = (flight) => {
     setSelectedOutboundFlight(flight);
     setBuildYourOwnStep('return');
-    setReturnFlights([]);
+
+    // Use the original search params (before they get overwritten)
+    const origParams = originalSearchParams || searchParams;
 
     // Use desired return date if specified, otherwise use outbound arrival date
-    const returnDepartureDate = searchParams.desiredReturnDate || (flight.arrival_date || flight.arrivalDate);
+    const returnDepartureDate = origParams.desiredReturnDate || (flight.arrival_date || flight.arrivalDate);
 
     // Automatically search for return flights
-    // Search from destination back to origin
+    // Search from ALL destination airports back to ALL origin airports
     const returnSearchParams = {
       searchMode: 'build-your-own-return',
       tripType: 'one-way',
-      origins: [flight.destination],
-      destinations: [flight.origin],
+      origins: origParams.destinations,  // All destination airports become origins
+      destinations: origParams.origins,  // All origin airports become destinations
       departureDate: returnDepartureDate,
       returnDate: null
     };
 
     console.log('🔄 Searching for return flights:', returnSearchParams);
-    console.log(`   From: ${flight.destination} → To: ${flight.origin}`);
+    console.log(`   From: ${origParams.destinations.join(', ')} → To: ${origParams.origins.join(', ')}`);
     console.log(`   Return date: ${returnDepartureDate}`);
 
     handleSearch(returnSearchParams);
@@ -61,8 +63,8 @@ function App() {
 
   const handleResetBuildYourOwn = () => {
     setSelectedOutboundFlight(null);
-    setReturnFlights([]);
     setBuildYourOwnStep('outbound');
+    setOriginalSearchParams(null);
     setFlights([]);
   };
 
@@ -78,7 +80,8 @@ function App() {
     if (params.searchMode === 'build-your-own') {
       setSelectedOutboundFlight(null);
       setBuildYourOwnStep('outbound');
-      setReturnFlights([]);
+      // Save the original search params for later use when searching return flights
+      setOriginalSearchParams(params);
     }
 
     setFromCache(false);
